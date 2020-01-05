@@ -183,7 +183,7 @@ export default {
       dialogTableVisible: false,
       dialogFormVisible: false,
 
-      sign:process.env.VUE_APP_BASEURL + "/captcha?type=login",
+      sign:process.env.VUE_APP_BASEURL + "/captcha?type=sendsms",
 
       form: {
         username: "",
@@ -264,7 +264,7 @@ export default {
         process.env.VUE_APP_BASEURL + "/captcha?type=login&t=" + Date.now();
     },
     changesign(){
-      this.sign = process.env.VUE_APP_BASEURL + "/captcha?type=login&t=" + Date.now();
+      this.sign = process.env.VUE_APP_BASEURL + "/captcha?type=sendsms&t=" + Date.now();
     }
     ,
     handleAvatarSuccess(res, file) {
