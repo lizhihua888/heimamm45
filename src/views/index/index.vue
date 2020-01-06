@@ -3,53 +3,65 @@
     <el-header class="my-header">
       <!-- 左侧 -->
       <div class="left">
-        <i class="icon el-icon-s-fold"></i>
+        <i @click="collapse = !collapse " class="icon el-icon-s-fold"></i>
         <img class="logo" src="../../assets/index_logo.png" alt />
         <span class="title">黑马面面</span>
       </div>
       <!-- 右侧 -->
       <div class="right">
-        <img class="avatar" :src="userInfo.avatar"  alt />
+        <img class="avatar" :src="userInfo.avatar" alt />
         <span class="username">{{ userInfo.username }},您好</span>
         <el-button @click="logout" size="small" type="primary">退出</el-button>
       </div>
     </el-header>
+
     <el-container>
-      <el-aside class="my-side" width="200px"> <el-menu default-active="2" class="el-menu-vertical-demo" @open="handleOpen" @close="handleClose">
-            <el-menu-item index="1">
-                <!-- e-charts -->
-                <i class="el-icon-pie-chart"></i>
-                <span slot="title">数据概览</span>
-            </el-menu-item>
-            <el-menu-item index="2">
-                <i class="el-icon-user"></i>
-                <span slot="title">用户列表</span>
-            </el-menu-item>
-            <el-menu-item index="3">
-                <i class="el-icon-edit-outline"></i>
-                <span slot="title">题库列表</span>
-            </el-menu-item>
-            <el-menu-item index="4">
-                <i class="el-icon-office-building"></i>
-                <span slot="title">企业列表</span>
-            </el-menu-item>
-            <el-menu-item index="5">
-                <i class="el-icon-notebook-2"></i>
-                <span slot="title">学科列表</span>
-            </el-menu-item>
-        </el-menu></el-aside>
+      <!-- 左侧 -->
+      <el-aside class="my-side" width="auto">
+        <el-menu
+          default-active="2"
+          class="el-menu-vertical-demo"
+          @open="handleOpen"
+          @close="handleClose"
+          :collapse='collapse'
+        >
+          <el-menu-item index="1">
+            <!-- e-charts -->
+            <i  class="el-icon-pie-chart"></i>
+            <span slot="title">数据概览</span>
+          </el-menu-item>
+          <el-menu-item index="2">
+            <i class="el-icon-user"></i>
+            <span slot="title">用户列表</span>
+          </el-menu-item>
+          <el-menu-item index="3">
+            <i class="el-icon-edit-outline"></i>
+            <span slot="title">题库列表</span>
+          </el-menu-item>
+          <el-menu-item index="4">
+            <i class="el-icon-office-building"></i>
+            <span slot="title">企业列表</span>
+          </el-menu-item>
+          <el-menu-item index="5">
+            <i class="el-icon-notebook-2"></i>
+            <span slot="title">学科列表</span>
+          </el-menu-item>
+        </el-menu>
+      </el-aside>
+
       <el-main class="my-main">Main</el-main>
     </el-container>
   </el-container>
 </template>
 <script>
-import {info,logout } from '../../api/login.js'
-import { removeToken } from '../../utils/token.js'
+import { info, logout } from "../../api/login.js";
+import { removeToken } from "../../utils/token.js";
 export default {
   name: "index",
   data() {
     return {
-      userInfo:{}
+      userInfo: {},
+      collapse: false
     };
   },
   created() {
@@ -57,30 +69,31 @@ export default {
       this.userInfo = res.data.data;
 
       //头像没有基地址 自己拼接
-      this.userInfo.avatar = process.env.VUE_APP_BASEURL + '/' + this.userInfo.avatar;
-    })
+      this.userInfo.avatar =
+        process.env.VUE_APP_BASEURL + "/" + this.userInfo.avatar;
+    });
   },
 
   methods: {
     logout() {
-        this.$confirm('是否退出?', '提示', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning'
-        }).then(() => {
-          
-          logout().then(res=>{
-            if(res.data.code === 200){
+      this.$confirm("是否退出?", "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning"
+      })
+        .then(() => {
+          logout().then(res => {
+            if (res.data.code === 200) {
               removeToken();
-              this.$router.push('/login')
+              this.$router.push("/login");
             }
-          })
-
-        }).catch(() => {
-          //点击取消       
+          });
+        })
+        .catch(() => {
+          //点击取消
         });
-      }
-  },
+    }
+  }
 };
 </script>
 
@@ -131,7 +144,7 @@ export default {
   }
 
   .my-side {
-  //background: #0094ff;
+    //background: #0094ff;
   }
 
   .my-main {
