@@ -1,5 +1,5 @@
 //定义常量的key
-const KEY = 'mmtoken'
+const KEY = 'hmmm'
 
 
 //暴露 保存token的语法

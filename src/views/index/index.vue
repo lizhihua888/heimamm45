@@ -1,16 +1,141 @@
 <template>
-  <div>
-    
-  </div>
+  <el-container class="index-container">
+    <el-header class="my-header">
+      <!-- 左侧 -->
+      <div class="left">
+        <i class="icon el-icon-s-fold"></i>
+        <img class="logo" src="../../assets/index_logo.png" alt />
+        <span class="title">黑马面面</span>
+      </div>
+      <!-- 右侧 -->
+      <div class="right">
+        <img class="avatar" :src="userInfo.avatar"  alt />
+        <span class="username">{{ userInfo.username }},您好</span>
+        <el-button @click="logout" size="small" type="primary">退出</el-button>
+      </div>
+    </el-header>
+    <el-container>
+      <el-aside class="my-side" width="200px"> <el-menu default-active="2" class="el-menu-vertical-demo" @open="handleOpen" @close="handleClose">
+            <el-menu-item index="1">
+                <!-- e-charts -->
+                <i class="el-icon-pie-chart"></i>
+                <span slot="title">数据概览</span>
+            </el-menu-item>
+            <el-menu-item index="2">
+                <i class="el-icon-user"></i>
+                <span slot="title">用户列表</span>
+            </el-menu-item>
+            <el-menu-item index="3">
+                <i class="el-icon-edit-outline"></i>
+                <span slot="title">题库列表</span>
+            </el-menu-item>
+            <el-menu-item index="4">
+                <i class="el-icon-office-building"></i>
+                <span slot="title">企业列表</span>
+            </el-menu-item>
+            <el-menu-item index="5">
+                <i class="el-icon-notebook-2"></i>
+                <span slot="title">学科列表</span>
+            </el-menu-item>
+        </el-menu></el-aside>
+      <el-main class="my-main">Main</el-main>
+    </el-container>
+  </el-container>
 </template>
 <script>
+import {info,logout } from '../../api/login.js'
+import { removeToken } from '../../utils/token.js'
 export default {
-    name:'index',
-    data() {
-      return {
-       
-      };
-    }
-};
+  name: "index",
+  data() {
+    return {
+      userInfo:{}
+    };
+  },
+  created() {
+    info().then(res => {
+      this.userInfo = res.data.data;
 
+      //头像没有基地址 自己拼接
+      this.userInfo.avatar = process.env.VUE_APP_BASEURL + '/' + this.userInfo.avatar;
+    })
+  },
+
+  methods: {
+    logout() {
+        this.$confirm('是否退出?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          
+          logout().then(res=>{
+            if(res.data.code === 200){
+              removeToken();
+              this.$router.push('/login')
+            }
+          })
+
+        }).catch(() => {
+          //点击取消       
+        });
+      }
+  },
+};
 </script>
+
+<style lang='less'>
+.index-container {
+  height: 100%;
+  .my-header {
+    //background: yellow;
+    display: flex;
+    justify-content: space-between;
+    .left {
+      display: flex;
+      align-items: center;
+      .icon {
+        font-size: 24px;
+        margin-right: 22px;
+      }
+
+      .logo {
+        width: 33px;
+        height: 28px;
+        margin-right: 11px;
+      }
+
+      .title {
+        margin-right: 11px;
+        font-size: 22px;
+        width: 92px;
+      }
+    }
+
+    .right {
+      display: flex;
+      align-items: center;
+      .avatar {
+        width: 43px;
+        height: 43px;
+        border-radius: 50%;
+        margin-right: 9px;
+      }
+
+      .username {
+        font-size: 14px;
+        color: #636363;
+        margin-right: 38px;
+      }
+    }
+  }
+
+  .my-side {
+  //background: #0094ff;
+  }
+
+  .my-main {
+    background-color: pink;
+  }
+}
+</style>

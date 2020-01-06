@@ -57,14 +57,14 @@
     <img class="bg" src="../../assets/login_banner_ele.png" alt />
 
     <!-- Dialog 对话框 -->
-    <el-dialog title="用户注册" :visible.sync="dialogFormVisible">
-      <el-form :model="form" :rules="dialog">
-        <el-form-item label="头像">
-          <!-- 头像 -->
+    <el-dialog center width='603px' title="用户注册" :visible.sync="dialogFormVisible">
+      <el-form ref='registerForm' :model="form" :rules="dialog">
+        <!-- 头像 -->
+        <el-form-item prop='avatar' label="头像" :label-width="formLabelWidth">
           <el-upload
             name="image"
             class="avatar-uploader"
-            action="http://127.0.0.1/heimamm/public/uploads"
+            :action="uploadURL"
             :show-file-list="false"
             :on-success="handleAvatarSuccess"
             :before-upload="beforeAvatarUpload"
@@ -73,7 +73,7 @@
             <i v-else class="el-icon-plus avatar-uploader-icon"></i>
           </el-upload>
         </el-form-item>
-        <el-form-item prop='username' label="昵称" :label-width="formLabelWidth">
+        <el-form-item prop="username" label="昵称" :label-width="formLabelWidth">
           <el-input v-model="form.username" autocomplete="off"></el-input>
         </el-form-item>
         <el-form-item prop="email" label="邮箱" :label-width="formLabelWidth">
@@ -93,34 +93,38 @@
 
         <el-form-item prop="arcode" label="图形码" :label-width="formLabelWidth">
           <el-row>
-            <el-col :span="18">
+            <el-col :span="17">
               <el-input prefix-icon="el-icon-key" v-model="form.arcode" autocomplete="off"></el-input>
             </el-col>
-            <el-col class="code-col" :span="6">
-              <img @click="changesign" :src="sign" alt />
+            <el-col class="code-col" :span="6" :offset='1'>
+              <img @click="changesign" :src="regCodeUrl" alt />
             </el-col>
           </el-row>
         </el-form-item>
 
         <el-form-item prop="code" label="验证码" :label-width="formLabelWidth">
           <el-row>
-            <el-col :span='18'><el-input v-model="form.code" autocomplete="off"></el-input></el-col>
-            <el-col :span='6'>
-              <el-button>获取验证码</el-button>
+            <el-col :span="16">
+              <el-input v-model="form.code" autocomplete="off"></el-input>
+            </el-col>
+            <el-col :span="7" :offset='1'>
+              <el-button @click="getMessage">{{ btnMessage }}</el-button>
             </el-col>
           </el-row>
         </el-form-item>
+
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogFormVisible = false">取 消</el-button>
-        <el-button type="primary" @click="dialogFormVisible = true">确 定</el-button>
+        <el-button type="primary" @click="submitRegister">确 定</el-button>
       </div>
     </el-dialog>
   </div>
 </template>
 <script>
 //import axios from "axios";
-import {login} from '../../api/login.js'
+import { login,sendsms,register } from "../../api/login.js";
+import { setToken } from "../../utils/token.js";
 
 const valdataPhone = (rule, value, callback) => {
   if (value === "") {
@@ -135,13 +139,13 @@ const valdataPhone = (rule, value, callback) => {
   }
 };
 
-const valdataEmail = (rule,value,callback)=>{
-  if(value === ''){
-    callback(new Error('邮箱不能为空'))
+const valdataEmail = (rule, value, callback) => {
+  if (value === "") {
+    callback(new Error("邮箱不能为空"));
   } else {
     const em = /\w+([-+.]\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*/;
-    if(em.test(value) == true){
-      callback()
+    if (em.test(value) == true) {
+      callback();
     } else {
       callback(new Error("邮箱格式错误"));
     }
@@ -153,7 +157,7 @@ export default {
 
   data() {
     return {
-      imageUrl: "",
+      
       codeUrl: process.env.VUE_APP_BASEURL + "/captcha?type=login",
       ruleForm: {
         code: "",
@@ -180,10 +184,21 @@ export default {
         ]
       },
 
-      dialogTableVisible: false,
-      dialogFormVisible: false,
-
-      sign:process.env.VUE_APP_BASEURL + "/captcha?type=sendsms",
+      dialog: {
+        email: [{ required:true,validator: valdataEmail, trigger: "blur" }],
+        password: [
+          { required: true, message: "请输入密码", trigger: "blur" },
+          { min: 6, max: 11, message: "长度必须至少为6位", trigger: "change" }
+        ],
+        arcode: [
+          { required: true, message: "请输入验证码", trigger: "blur" },
+          { min: 4, max: 4, message: "请输入完整验证码", trigger: "blur" }
+        ],
+        phone: [{ required:true,validator: valdataPhone, trigger: "blur" }],
+        code: [{ required: true, message: "验证码不能为空", trigger: "blur" }],
+        username: [{ required: true, message: "请输入昵称", trigger: "blur" }],
+        avatar:[{ required: true, message: "请输入昵称", trigger: "change" }]
+      },
 
       form: {
         username: "",
@@ -192,40 +207,32 @@ export default {
         code: "",
         arcode: "",
         email: "",
-
-        delivery: false,
-        type: [],
-        resource: "",
-        desc: ""
+        avatar:''   
       },
-      formLabelWidth: "80px",
 
-      dialog: {
-        email:[
-          {validator:valdataEmail,trigger:'blur'}
-        ],
-        password:[
-          {required:true,message:'请输入密码',trigger:'blur'},
-          {min:6,max:11,message:'长度必须至少为6位',trigger:'change'}
-        ],
-        arcode:[
-        {required:true,message:'请输入验证码',trigger:'blur'},
-        {min:4,max:4,message:'请输入完整验证码',trigger:'blur'}
-        ],
-        phone:[
-          {validator:valdataPhone,trigger:'blur'}
-        ],
-        code:[
-          {required:true,message:'验证码不能为空',trigger:'blur'}
-        ],
-        username:[
-          {required:true,message:'请输入昵称',trigger:'blur'}
-        ]
-      }
+      //左侧间隙
+      formLabelWidth: "68px",
+      
+      dialogFormVisible: false,
+
+      imageUrl: "",
+      //验证码图片的地址
+      regCodeUrl: process.env.VUE_APP_BASEURL + "/captcha?type=sendsms",
+      //文件上传的地址
+      uploadURL : process.env.VUE_APP_BASEURL+ '/uploads',
+
+      delayTime:0,
+      btnMessage:'获取用户验证码',
+
+      
+      
+
+      
     };
   },
 
   methods: {
+
     submitForm(formName) {
       if (this.ruleForm.checked == false) {
         //提示
@@ -236,16 +243,21 @@ export default {
       this.$refs[formName].validate(valid => {
         if (valid) {
           login({
-            phone:this.ruleForm.phone,
-            password:this.password,
-            code:this.ruleForm.code
+            phone: this.ruleForm.phone,
+            password: this.ruleForm.password,
+            code: this.ruleForm.code
           }).then(res => {
             //成功回调
+            window.console.log(res)
             if (res.data.code == 202) {
+   
               //错误
-              this.message.error(res.data.message);
+              this.$message.error(res.data.message);
             } else if (res.data.code == 200) {
+              window.console.log(123)
               this.$message.success("登录成功");
+              setToken(res.data.data.token);
+              this.$router.push('/index');
             }
           });
         } else {
@@ -263,12 +275,14 @@ export default {
       this.codeUrl =
         process.env.VUE_APP_BASEURL + "/captcha?type=login&t=" + Date.now();
     },
-    changesign(){
-      this.sign = process.env.VUE_APP_BASEURL + "/captcha?type=sendsms&t=" + Date.now();
-    }
-    ,
+    changesign() {
+      this.regCodeUrl =
+        process.env.VUE_APP_BASEURL + "/captcha?type=sendsms&t=" + Date.now();
+    },
     handleAvatarSuccess(res, file) {
       this.imageUrl = URL.createObjectURL(file.raw);
+
+      this.form.avatar = res.data.file_path;
     },
     beforeAvatarUpload(file) {
       const isJPG = file.type === "image/jpeg";
@@ -281,6 +295,76 @@ export default {
         this.$message.error("上传头像图片大小不能超过 2MB!");
       }
       return isJPG && isLt2M;
+    },
+
+    getMessage(){
+      const reg = /^(0|86|17951)?(13[0-9]|15[012356789]|166|17[3678]|18[0-9]|14[57])[0-9]{8}$/
+      if(reg.test(this.form.phone) == false ){
+        return this.$message.error('手机号码格式不对')
+      }
+
+      if(this.form.arcode.length != 4 ){
+        return this.$message.error('图像验证码不对')
+      }
+
+      if(this.delayTime === 0){
+        //改成60
+        this.delayTime = 60;
+        //判断一些值
+        const interId = setInterval(()=>{
+          //递减
+          this.delayTime --;
+          this.btnMessage = `还剩下${this.delayTime}秒哦!`
+          if(this.delayTime === 0){
+            //倒计时介绍
+            //清除定时器
+            clearInterval(interId);
+            //还原文本
+            this.btnMessage = '获取用户验证码';
+          }
+        },1000)
+      } else {
+        //正在倒计时中
+        return;
+      }
+
+      sendsms({
+        code: this.form.arcode,
+        phone: this.form.phone
+      }).then(res => {
+         //window.console.log(res)
+         //window.console.log(this.form.arcode)
+        if (res.data.code == 200) {
+          this.$message.success("短信验证码是:" + res.data.data.captcha);
+        }
+      });
+    },
+
+    submitRegister(){
+      //验证表单
+      this.$refs.registerForm.validate(valid =>{
+        if(valid){
+          register({
+            username:this.form.username,
+            phone:this.form.phone,
+            email:this.form.email,
+            avatar:this.form.avatar,
+            rcode:this.form.code,
+            password:this.form.password
+          }).then(res=>{
+            if(res.data.code == 200){
+              this.$message.success('注册成功,请登录')
+              //关闭弹窗
+              this.dialogFormVisible = false
+            }else if(res.data.code == 201) {
+              this.$message.warning(res.data.message)
+            }
+          })
+        } else {
+          this.$message.error('格式不对,请检查')
+          return false;
+        }
+      })
     }
   }
 };
@@ -364,10 +448,7 @@ export default {
   }
   .bg {
   }
-}
-</style>
 
-<style lang='less'>
 .avatar-uploader .el-upload {
   border: 1px dashed #d9d9d9;
   border-radius: 6px;
@@ -384,7 +465,7 @@ export default {
   width: 178px;
   height: 178px;
   line-height: 178px;
-  transform: translateY(74px);
+  //transform: translateY(74px);
   text-align: center;
 }
 .avatar {
@@ -406,4 +487,23 @@ export default {
     cursor: pointer;
   }
 }
+
+ .el-dialog__header {
+    background: linear-gradient(to right, rgba(1, 198, 250, 1), rgba(20, 147, 250, 1));
+  }
+  // 对话框的颜色
+  .el-dialog__title {
+    color: white;
+  }
+
+  el-dialog__headerbtn {
+   color:white; 
+  }
+
+
+
+
+
+}
 </style>
+
