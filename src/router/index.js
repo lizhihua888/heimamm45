@@ -42,6 +42,10 @@ const router = new VueRouter({
                 }
             ]
         },
+        {
+            path:'/index',
+            redirect:'/index/subject',
+        }
     ]
 })
 
