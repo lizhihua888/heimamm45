@@ -1,11 +1,208 @@
 <template>
+  <div>
+    <el-form :inline="true" :model="formInline" class="demo-form-inline">
+      <el-form-item label="企业编号">
+        <el-input v-model="formInline.user" placeholder></el-input>
+      </el-form-item>
+      <el-form-item label="企业名称">
+        <el-input v-model="formInline.user" placeholder></el-input>
+      </el-form-item>
+      <el-form-item label="创建者">
+        <el-input v-model="formInline.user" placeholder></el-input>
+      </el-form-item>
+      <el-form-item label="状态">
+        <el-select v-model="formInline.region" placeholder="请选择状态">
+          <el-option label="区域一" value="shanghai"></el-option>
+          <el-option label="区域二" value="beijing"></el-option>
+        </el-select>
+      </el-form-item>
+      <el-form-item>
+        <el-button type="primary">搜索</el-button>
+      </el-form-item>
+      <el-form-item>
+        <el-button @click="onSubmit">清除</el-button>
+      </el-form-item>
+      <el-form-item>
+        <el-button type="primary" icon="el-icon-plus" @click="dialogFormVisible = true">新增企业</el-button>
+      </el-form-item>
+    </el-form>
+
+    <!-- 自定义表格模板 -->
+    <el-table :data="tableData" style="width: 100%">
+      <el-table-column label="序号" type='index' width="100">
+      </el-table-column>
+
+      <el-table-column label="企业编号" width="180">
+        <template slot-scope="scope">
+          <i class="el-icon-time"></i>
+          <span style="margin-left: 10px">{{ scope.row.date }}</span>
+        </template>
+      </el-table-column>
+
+      <el-table-column label="企业名称" width="180">
+        <template slot-scope="scope">
+          <i class="el-icon-time"></i>
+          <span style="margin-left: 10px">{{ scope.row.mc }}</span>
+        </template>
+      </el-table-column>
+
+      <el-table-column label="企业简称" width="180">
+        <template slot-scope="scope">
+          <i class="el-icon-time"></i>
+          <span style="margin-left: 10px">{{ scope.row.jc }}</span>
+        </template>
+      </el-table-column>
+
+
+      <el-table-column label="创建日期" width="180">
+        <template slot-scope="scope">
+          <i class="el-icon-time"></i>
+          <span style="margin-left: 10px">{{ scope.row.date }}</span>
+        </template>
+      </el-table-column>
+
+      <el-table-column label="状态" width="180">
+        <template slot-scope="scope">
+          <el-popover trigger="hover" placement="top">
+            <p>姓名: {{ scope.row.name }}</p>
+            <p>住址: {{ scope.row.address }}</p>
+            <div slot="reference" class="name-wrapper">
+              <el-tag size="medium">{{ scope.row.name }}</el-tag>
+            </div>
+          </el-popover>
+        </template>
+      </el-table-column>
+
+      <el-table-column label="操作">
+        <template slot-scope="scope">
+          <el-button size="mini" @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
+          <el-button size="mini" type="danger" @click="handleDelete(scope.$index, scope.row)">启用</el-button>
+          <el-button size="mini" @click="handleEdit(scope.$index, scope.row)">删除</el-button>
+        </template>
+      </el-table-column>
+    </el-table>
+
+    <!-- 分页 -->
+    <div class="pagination">
+      <el-pagination
+        background
+        @size-change="handleSizeChange"
+        @current-change="handleCurrentChange"
+        :current-page="currentPage4"
+        :page-sizes="[100, 200, 300, 400]"
+        :page-size="100"
+        layout="total, sizes, prev, pager, next, jumper"
+        :total="400"
+      ></el-pagination>
+    </div>
+
+    <!-- dialog 新增对话框 -->
+    <el-dialog width="600px" title="新增企业" center  :visible.sync="dialogFormVisible">
+      <el-form :model="form" :rules="dialog">
+        <el-form-item prop="subname" label="学科编号" :label-width="formLabelWidth">
+          <el-input v-model="form.name" autocomplete="off"></el-input>
+        </el-form-item>
+         <el-form-item prop="subject" label="企业名称" :label-width="formLabelWidth">
+          <el-input v-model="form.name" autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="企业简称" :label-width="formLabelWidth">
+          <el-input v-model="form.name" autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="企业简介" :label-width="formLabelWidth">
+          <el-input v-model="form.name" autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="企业备注" :label-width="formLabelWidth">
+          <el-input v-model="form.name" autocomplete="off"></el-input>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="dialogFormVisible = false">取 消</el-button>
+        <el-button type="primary" @click="dialogFormVisible = false">确 定</el-button>
+      </div>
+    </el-dialog>
     
-        <img src="../../../assets/enterprise.jpg" alt="">
-   
+  </div>
 </template>
 
 <script>
 export default {
-    name:'enterprise'
-}
+  name: "chart",
+  data() {
+    return {
+      formInline: {
+        user: "",
+        region: ""
+      },
+
+      tableData: [
+        {
+          date: "QD001",
+          name: "启用",
+          address: "上海市普陀区金沙江路 1518 弄",
+          cp: "张三",
+          jc: "前端",
+          mc: "前端学科"
+        }
+      ],
+
+      currentPage1: 5,
+      currentPage2: 5,
+      currentPage3: 5,
+      currentPage4: 4,
+
+      //dialog 对话框
+      dialogTableVisible: false,
+      dialogFormVisible: false,
+      form: {
+        name: "",
+        region: "",
+        date1: "",
+        date2: "",
+        delivery: false,
+        type: [],
+        resource: "",
+        desc: ""
+      },
+      formLabelWidth: "120px",
+
+      dialog:{
+        subject:[
+          {required:true,message:'请输入企业名称',trigger:blur}
+        ],
+        subname:[
+          {required:true,message:'请输入企业编号',trigger:blur}
+        ]
+      }
+    };
+  },
+
+  methods: {
+    onSubmit() {
+      window.console.log("submit!");
+    },
+    handleEdit(index, row) {
+      window.console.log(index, row);
+    },
+    handleDelete(index, row) {
+      window.console.log(index, row);
+    },
+
+    handleSizeChange(val) {
+      window.console.log(`每页 ${val} 条`);
+    },
+    handleCurrentChange(val) {
+      window.console.log(`当前页: ${val}`);
+    }
+  }
+};
 </script>
+
+<style >
+.pagination {
+  text-align: center;
+}
+
+.el-dialog__header {
+    background: linear-gradient(to right, rgba(1, 198, 250, 1), rgba(20, 147, 250, 1));
+  }
+</style>
