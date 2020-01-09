@@ -80,7 +80,7 @@ export function subjectEdit(data){
 //学科删除
 export function subjectRemove(data){
     return subjectRequest({
-        url:'/subject/c',
+        url:'/subject/remove',
         method:'post',
         data
     })

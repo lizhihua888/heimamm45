@@ -7,6 +7,8 @@ import ElementUI from 'element-ui';
 import 'element-ui/lib/theme-chalk/index.css';
 import '../src/style/base.css'
 
+//导入全局过滤器
+import './filters/index.js'
 
 Vue.use(ElementUI)
 

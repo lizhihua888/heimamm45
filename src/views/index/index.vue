@@ -145,7 +145,7 @@ export default {
   }
 
   .my-main {
-    background-color: pink;
+    //background-color: pink;
   }
 
   //导航菜单的 样式
