@@ -1,21 +1,21 @@
 <template>
   <div class="subject-container">
     <el-card class="card-header">
-      <el-form :inline="true" :model="formInline" class="demo-form-inline">
+      <el-form ref='formInline' :inline="true" :model="formInline" class="demo-form-inline">
         <el-form-item label="学科编号" prop="rid">
-          <el-input class="small" v-model="formInline.user" placeholder></el-input>
+          <el-input class="small" v-model="formInline.rid" placeholder></el-input>
         </el-form-item>
 
         <el-form-item label="学科名称" prop="name">
-          <el-input class="normal" v-model="formInline.user" placeholder></el-input>
+          <el-input class="normal" v-model="formInline.name" placeholder></el-input>
         </el-form-item>
 
         <el-form-item label="创建者" prop="username">
-          <el-input class="small" v-model="formInline.user" placeholder></el-input>
+          <el-input class="small" v-model="formInline.username" placeholder></el-input>
         </el-form-item>
 
         <el-form-item label="状态" prop="status">
-          <el-select class="normal" v-model="formInline.region" placeholder="请选择状态">
+          <el-select class="normal" v-model="formInline.status" placeholder="请选择状态">
             <el-option label="启用" value="1"></el-option>
             <el-option label="禁用" value="0"></el-option>
           </el-select>
@@ -290,5 +290,9 @@ export default {
 
 .card-main {
   margin-top: 21px;
+}
+
+span.red {
+  color: red;
 }
 </style>
